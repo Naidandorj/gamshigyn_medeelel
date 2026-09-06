@@ -167,7 +167,7 @@ function Login({onLogin}) {
         <label style={{color:"#94a3b8",fontSize:11,fontWeight:700,display:"block",marginBottom:6,letterSpacing:0.8,textTransform:"uppercase"}}>Нууц үг</label>
         <input type="password" value={pass} onChange={e=>{setPass(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&(pass==="admin123"?onLogin("admin"):setErr("Нууц үг буруу!"))} placeholder="Нууц үг оруулна уу" style={inp}/>
         {err&&<div style={{color:"#f87171",fontSize:12,marginTop:5}}>{err}</div>}
-        <div style={{color:"#334155",fontSize:11,marginTop:4}}>Нууц үг: admin123</div>
+        <div style={{color:"#334155",fontSize:11,marginTop:4}}>Нууц үг: 123456</div><!---admin123--!>
       </div>}
       <button onClick={()=>{if(mode==="admin"&&pass!=="admin123"){setErr("Нууц үг буруу!");return;}onLogin(mode);}} style={{width:"100%",background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",color:"#fff",border:"none",borderRadius:12,padding:"13px 0",fontWeight:800,fontSize:15,cursor:"pointer",boxShadow:"0 8px 24px rgba(99,102,241,0.35)"}}>
         Нэвтрэх →
