@@ -1,11 +1,272 @@
 <!DOCTYPE html>
 <html lang="mn">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Гамшгийн Мэдээллийн Сан</title>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Орхон аймгийн Гамшгийн Мэдээллийн Сан</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #020817; font-family: 'Segoe UI', system-ui, sans-serif; color: #f1f5f9; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    input, select, textarea, button { font-family: inherit; }
+    .hide-scroll::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const { useState, useEffect } = React;
+
+const REAL_DISASTERS = [
+  { id:1, name:"УБЭУ фабрикийн бутлуурын хүдэрт осол", type:"Үйлдвэрийн осол", location:"Улаанбаатар, УБЭУ фабрик", date:"2003-03-23", measures:"Осолд өртсөн хүнийг авран гаргах, эмнэлэгт хүргэх", risks:"1 хүн насбарсан, 10 хүн хүч, 2 машин техник", lesson:"Тоног төхөөрөмжийн эвдрэлээс сэргийлэх урьдчилсан үзлэг шаардлагатай" },
+  { id:2, name:"УБЭУ Худрийн ил уурхайн өөрөө нунтаглан баяжуулах хэсэгт осол", type:"Үйлдвэрийн осол", location:"УБЭУ Худрийн ил уурхай, 26-р тэчик", date:"2005-10-15", measures:"Осолд өртсөн хүүхдийг авран гаргах, яаралтай тусламж үзүүлэх", risks:"1 хүүхэд насбарсан, 15 хүн хүч, 2 машин техник", lesson:"Болгоомжгүй үйлдлээс сэргийлэх хамгаалалт шаардлагатай" },
+  { id:3, name:"Металл индустриал ХХК-д осол", type:"Үйлдвэрийн осол", location:"Улаанбаатар, Металл индустриал ХХК", date:"2006-01-26", measures:"Осолд өртсөн хүнийг авран гаргах, эмнэлэгт хүргэх", risks:"1 хүн насбарсан, 5 хүн хүч, 1 машин техник", lesson:"Технологийн дүрэм журам чандлан мөрдөх шаардлагатай" },
+  { id:4, name:"УБЭУ БФ-ийн КСИ өргөгч унасан", type:"Үйлдвэрийн осол", location:"Улаанбаатар, УБЭУ БФ КСИ", date:"2006-03-07", measures:"Осолд өртсөн хүнийг авран гаргах, тоног төхөөрөмжийн засвар", risks:"1 хүн насбарсан, 13 хүн хүч, 1 машин техник", lesson:"Тросс тасарсан — өргөгч тоног төхөөрөмжийн тогтмол шалгалт хийх" },
+  { id:5, name:"УБЭУ БФ-ийн төв корпуст осол", type:"Үйлдвэрийн осол", location:"Улаанбаатар, УБЭУ БФ төв корпус", date:"2006-10-20", measures:"Осолд өртсөн хүмүүсийг авран гаргах, эмнэлэгт хүргэх", risks:"2 хүн насбарсан, 13 хүн хүч, 2 машин техник", lesson:"Технологийн аюулгүй ажиллагааны дүрэм чандлан мөрдөх" },
+  { id:6, name:"УБЭУ БФабрикийн тээрмийн тулгуур даргадсан", type:"Үйлдвэрийн осол", location:"Улаанбаатар, УБЭУ БФабрик", date:"2009-03-11", measures:"Осолд өртсөн хүмүүсийг авран гаргах, тоног төхөөрөмжийн засвар", risks:"2 хүн насбарсан, 15 хүн хүч, 2 машин техник", lesson:"Тээрмийн тулгуурын тогтмол шалгалт, засвар үйлчилгээ шаардлагатай" },
+  { id:7, name:"ЭДЦС ТӨХК-д осол", type:"Үйлдвэрийн осол", location:"Улаанбаатар, ЭДЦС ТӨХК", date:"2011-02-05", measures:"Осолд өртсөн хүнийг авран гаргах, эмнэлэгт хүргэх", risks:"1 хүн насбарсан, 12 хүн хүч", lesson:"Нүүрсэнд даруулж үхсэн — нүүрсний агуулахад аюулгүй ажиллагаа чухал" },
+  { id:8, name:"УБЭУ-ийн эрэгтийн усан санд осол", type:"Үйлдвэрийн осол", location:"Улаанбаатар, УБЭУ эрэгтийн усан сан", date:"2011-08-04", measures:"Осолд өртсөн хүнийг усан сангаас авран гаргах", risks:"1 хүн насбарсан, 6 хүн хүч, 1 машин техник", lesson:"Согтуу хүн усан санд унасан — аюулгүй байдлын хашлага, хяналт шаардлагатай" },
+  { id:9, name:"БӨ сум Баянбулаг багт хүүхэд гарт хайчилсан", type:"Үйлдвэрийн осол", location:"Орхон аймаг, БӨ сум, Баянбулаг баг 1-01 тоотод", date:"2014-09-30", measures:"Осолд өртсөн хүүхдийг эмнэлэгт хүргэх, яаралтай тусламж үзүүлэх", risks:"4 хүн хүч, 1 машин техник. 2 настай хүүхэд махны машинд гараа хийсэн", lesson:"Хүүхдийн хүрэх боломжгүй газар тоног төхөөрөмж байрлуулах" },
+  { id:10, name:"БӨ сум Баянцагаан багт зуурмагны машинд хөлөө хавчуулсан", type:"Үйлдвэрийн осол", location:"Орхон аймаг, БӨ сум, Баянцагаан баг", date:"2014-11-22", measures:"Осолд өртсөн хүнийг эмнэлэгт хүргэх", risks:"4 хүн хүч, 1 машин техник. Зуурмагны машинд хөлөө хавчуулсан", lesson:"Барилгын тоног төхөөрөмж ашиглах үед аюулгүй ажиллагааны дүрэм мөрдөх" },
+  { id:11, name:"УБЭУ БМТС болон РМЗ-ын вагон зүтгүүр автомашинтай мөргөлдсөн", type:"Авто осол", location:"Улаанбаатар, УБЭУ БМТС болон РМЗ", date:"2005-05-27", measures:"Осолд өртсөн хүмүүсийг авран гаргах, эмнэлэгт хүргэх", risks:"12 хүн хүч, 2 машин техник", lesson:"Болгоомжгүй жолоодолт — замын хөдөлгөөний аюулгүй байдлыг сахих" },
+  { id:12, name:"ЭДЦС-ын урд замдаар авто осол", type:"Авто осол", location:"Улаанбаатар, ЭДЦС-ын урд зам", date:"2007-11-03", measures:"Осолд өртсөн хүмүүсийг авран гаргах, эмнэлэгт хүргэх", risks:"2 хүн насбарсан, 8 хүн хүч, 1 машин техник", lesson:"Болгоомжгүй жолоодолт — замын хөдөлгөөний дүрэм чандлан мөрдөх" },
+  { id:13, name:"7 дугаар микрийн нурд замдаар авто осол", type:"Авто осол", location:"Улаанбаатар, 7 дугаар микрийн нурд зам", date:"2008-09-02", measures:"Осолд өртсөн хүмүүсийг авран гаргах, эмнэлэгт хүргэх", risks:"8 хүн хүч, 1 машин техник", lesson:"Явган хүний зам, гарцын аюулгүй байдал чухал" },
+  { id:14, name:"Орхон аймгийн үер — Баянцагаан баг", type:"Үер", location:"Орхон аймаг, Баян-Өндөр сум, Баянцагаан баг", date:"2006-07-08", measures:"Иргэдийг нүүлгэн шилжүүлэх, 11 хүн хүч 2 машин техник ажиллуулсан", risks:"Нас барсан 1, томоохон хохирол учирсан", lesson:"Урьдчилан сэрэмжлүүлэх систем, үерийн далан хамгаалалт шаардлагатай" },
+  { id:15, name:"Баян-Өндөр сум Шанд баг үер", type:"Үер", location:"Орхон аймаг, Баян-Өндөр сум, Шанд баг 23-36 тоот", date:"2007-08-25", measures:"Иргэдийг нүүлгэн шилжүүлэх, 6 хүн хүч ажиллуулсан", risks:"Хохирол учирсан", lesson:"Шанд багийн үерийн далан бэхлэлт шаардлагатай" },
+  { id:16, name:"Баян-Өндөр сум Баянцагаан баг үер 2008", type:"Үер", location:"Орхон аймаг, Баян-Өндөр сум, Баянцагаан баг", date:"2008-03-10", measures:"Иргэдийг нүүлгэн шилжүүлэх, 45 хүн хүч ажиллуулсан", risks:"Нас барсан 1, Шинэ тосгоны зүүн хойд жалгаар", lesson:"Цасны хайлалтын үерийн урьдчилсан сэрэмжлүүлэг хэрэгтэй" },
+  { id:17, name:"Их залуу хээрийн үер", type:"Үер", location:"Орхон аймаг, Баян-Өндөр сум, Их залуу баг", date:"2010-03-28", measures:"Иргэдийг нүүлгэн шилжүүлэх, 178 хүн хүч 3 машин техник ажиллуулсан", risks:"Томоохон хохирол учирсан", lesson:"Урт хугацааны үерийн хяналт, мониторинг шаардлагатай" },
+  { id:18, name:"Баян-Өндөр, Жаргалант сумын үер 2016", type:"Үер", location:"Орхон аймаг, Баян-Өндөр сум, Шанд, Уртын гол, Яргуйт", date:"2016-07-09", measures:"Иргэдийг нүүлгэн шилжүүлэх, 70 хүн хүч 6 машин техник ажиллуулсан", risks:"2 хүн насбарсан, томоохон хохирол учирсан", lesson:"Хүүхдийн аюулгүй байдалд онцгой анхаарах, үерийн хамгаалалт бэхжүүлэх" },
+  { id:19, name:"Жаргалант сум Хавчиг ойн түймэр", type:"Ой хээрийн түймэр", location:"Орхон аймаг, Жаргалант сум, Хавчиг", date:"2005-04-02", measures:"10 хүн хүч ажиллуулж түймэр унтраасан", risks:"1 удаа гарсан", lesson:"Хаврын үед ойн түймрийн эрсдэл өндөр — урьдчилан сэргийлэх арга хэмжээ шаардлагатай" },
+  { id:20, name:"Баян-Өндөр улын барруун хойд суганд ойн түймэр", type:"Ой хээрийн түймэр", location:"Орхон аймаг, Баян-Өндөр улын барруун хойд сугаанд", date:"2005-04-14", measures:"8 хүн хүч ажиллуулж, 2 удаа гарсан түймэрийг унтраасан", risks:"2 удаа гарсан", lesson:"Ойн хяналтыг сайжруулах шаардлагатай" },
+  { id:21, name:"Жаргалант сум Хендлэн ойн хээрийн түймэр", type:"Ой хээрийн түймэр", location:"Орхон аймаг, Жаргалант сум, Хэндлэн", date:"2013-04-20", measures:"111 хүн хүч, 41 техник ажиллуулж 150 га шатсан түймэрийг унтраасан", risks:"41 удаа гарсан, 150 га талбай шатсан, 2,489,650 төгрөгийн хохирол учирсан", lesson:"Хэндлэний ойн хамгаалалтын тогтолцоог бэхжүүлэх, гал унтраах бригад байнга бэлэн байх" },
+  { id:22, name:"Жаргалант сум Баастинзэх ойн түймэр", type:"Ой хээрийн түймэр", location:"Орхон аймаг, Жаргалант сум, Баастинзэх", date:"2013-05-17", measures:"41 хүн хүч, 5 техник ажиллуулж 82 га шатсан түймэрийг унтраасан", risks:"82 га талбай шатсан, 70,500 төгрөгийн хохирол учирсан", lesson:"Ойн хамгаалалтын нэгдсэн системтэй байх шаардлагатай" },
+  { id:23, name:"Жаргалант сум Соглоот Уул ойн түймэр", type:"Ой хээрийн түймэр", location:"Орхон аймаг, Жаргалант сум, Соглоот Уул", date:"2014-04-05", measures:"73 хүн хүч, 13 техник ажиллуулж түймэр унтраасан", risks:"13 удаа гарсан, 2 га ой шатсан, 1,814,800 төгрөгийн хохирол учирсан", lesson:"Соглоот Уулын ойн хамгаалалтын хяналт сайжруулах шаардлагатай" },
+  { id:24, name:"Баян-Өндөр сум шуурга — 2015-10-07", type:"Цасан шуурга", location:"Орхон аймаг, Баян-Өндөр сум", date:"2015-10-07", measures:"Иргэдэд мэдээлэл хүргэх, замын хөдөлгөөнийг зохицуулах", risks:"Салхины хурд 8–12 м/сек, 1 цаг 30 минут үргэлжилсэн", lesson:"Намрын эхэн үед шуурганы урьдчилан сэрэмжлүүлэг хэрэгтэй" },
+  { id:25, name:"Баян-Өндөр сум шуурга — 2015-10-25", type:"Цасан шуурга", location:"Орхон аймаг, Баян-Өндөр сум", date:"2015-10-25", measures:"Иргэдэд мэдээлэл хүргэх, замын хөдөлгөөнийг зохицуулах", risks:"Салхины хурд 6–12 м/сек, алсын бараа 4 км, 9 цаг 14 минут үргэлжилсэн", lesson:"Намрын шуурганы мониторинг системийг сайжруулах шаардлагатай" },
+  { id:26, name:"Баян-Өндөр сум шуурга харанхуй — 2015-03-04", type:"Цасан шуурга", location:"Орхон аймаг, Баян-Өндөр сум", date:"2015-03-04", measures:"Иргэдэд мэдээлэл хүргэх", risks:"Салхины хурд 11–16 м/сек, харанхуй, 7 цаг 04 минут үргэлжилсэн", lesson:"Шуурганы үеийн харааны аюулгүй байдал чухал" },
+  { id:27, name:"Орхон аймгийн цацраг химийн осол 2005-2016", type:"Цацраг хими", location:"Орхон аймаг", date:"2005-01-01", measures:"Холбогдох байгууллагуудад мэдэгдэх, аюулгүй зонд хүн нүүлгэх", risks:"2005-2016 онд нийт 20 удаа тохиолдсон", lesson:"Цацраг химийн аюулгүй байдлын хяналтыг сайжруулах" },
+  { id:28, name:"Орхон аймгийн ахуйн осол 2005-2016", type:"Ахуйн осол", location:"Орхон аймаг", date:"2005-01-01", measures:"Яаралтай тусламж үзүүлэх, холбогдох байгууллагуудад мэдэгдэх", risks:"2005-2016 онд нийт 38 удаа тохиолдсон", lesson:"Ахуйн аюулгүй байдлын мэдлэгийг нэмэгдүүлэх, иргэдийг сургах шаардлагатай" },
+  { id:29, name:"Баянцагаан багийн нутаг дэвсгэрт авто осол үерийн улмаас", type:"Авто осол", location:"Орхон аймаг, Баян-Өндөр сум, Баянцагаан баг", date:"2012-07-14", measures:"6 авто замын гүүрийн тулгуур багана хазайж унасан, 70 хүн хүч ажиллуулсан", risks:"2 хүн насбарсан, 23100 айл өрх цахилгаангүй болсон, Жаргалант суманд 60 айл өрхийн 22 га ногооны талбай усанд нэрвэгдсэн, 13 жилд 12 хүн амь насаа алдсан", lesson:"Үерийн улмаас гүүрийн бат бэх байдалд урьдчилан шалгалт хийх. Малчдын нүүдэл суудлын автомашин 2, автомашины гараж 10 тус тус усанд автсан." },
+];
+
+const TYPES = ["Үйлдвэрийн осол","Авто осол","Үер","Ой хээрийн түймэр","Цасан шуурга","Цацраг хими","Ахуйн осол","Нуранги","Зуд","Газар хөдлөлт","Бусад"];
+
+const TYPE_COLOR = {"Үйлдвэрийн осол":"#f97316","Авто осол":"#ef4444","Үер":"#3b82f6","Ой хээрийн түймэр":"#dc2626","Цасан шуурга":"#06b6d4","Цацраг хими":"#a855f7","Ахуйн осол":"#f59e0b","Нуранги":"#84cc16","Зуд":"#8b5cf6","Газар хөдлөлт":"#ec4899","Бусад":"#6b7280"};
+const TYPE_ICON = {"Үйлдвэрийн осол":"⚙️","Авто осол":"🚗","Үер":"🌊","Ой хээрийн түймэр":"🔥","Цасан шуурга":"❄️","Цацраг хими":"☢️","Ахуйн осол":"🏠","Нуранги":"⛰️","Зуд":"🌨️","Газар хөдлөлт":"🌍","Бусад":"⚠️"};
+
+const clr = t => TYPE_COLOR[t] || "#6b7280";
+const icn = t => TYPE_ICON[t] || "⚠️";
+
+const inp = { width:"100%", background:"#1e293b", border:"1px solid #334155", borderRadius:10, color:"#f1f5f9", padding:"10px 12px", fontSize:14, outline:"none", boxSizing:"border-box", fontFamily:"inherit" };
+
+function Badge({type}) {
+  return <span style={{background:clr(type)+"22",color:clr(type),border:`1px solid ${clr(type)}55`,borderRadius:20,padding:"2px 10px",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}}>{icn(type)} {type}</span>;
+}
+
+function Modal({open,onClose,children}) {
+  if(!open) return null;
+  return <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000,padding:16}}>
+    <div onClick={e=>e.stopPropagation()} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:20,padding:24,width:"100%",maxWidth:520,maxHeight:"92vh",overflowY:"auto",boxShadow:"0 30px 70px rgba(0,0,0,0.7)"}}>
+      {children}
+    </div>
+  </div>;
+}
+
+function Field({label,req,children}) {
+  return <div style={{marginBottom:12}}>
+    <label style={{display:"block",color:"#94a3b8",fontSize:11,fontWeight:700,marginBottom:5,letterSpacing:0.8,textTransform:"uppercase"}}>{label} {req&&<span style={{color:"#ef4444"}}>*</span>}</label>
+    {children}
+  </div>;
+}
+
+function Form({initial,onSave,onCancel}) {
+  const empty={name:"",type:TYPES[0],location:"",date:"",measures:"",risks:"",lesson:""};
+  const [f,setF]=useState(initial||empty);
+  const s=(k,v)=>setF(p=>({...p,[k]:v}));
+  return <div>
+    <h2 style={{color:"#f1f5f9",fontSize:17,fontWeight:900,marginBottom:18,marginTop:0}}>{initial?"✏️ Засах":"➕ Гамшиг нэмэх"}</h2>
+    <Field label="Гамшгийн нэр" req><input style={inp} value={f.name} onChange={e=>s("name",e.target.value)} placeholder="Гамшгийн нэр оруулна уу"/></Field>
+    <Field label="Төрөл" req><select style={inp} value={f.type} onChange={e=>s("type",e.target.value)}>{TYPES.map(t=><option key={t}>{t}</option>)}</select></Field>
+    <Field label="Байршил" req><input style={inp} value={f.location} onChange={e=>s("location",e.target.value)} placeholder="Аймаг, сум, баг, байршил"/></Field>
+    <Field label="Он сар өдөр" req><input style={{...inp,colorScheme:"dark"}} type="date" value={f.date} onChange={e=>s("date",e.target.value)}/></Field>
+    <Field label="Авсан арга хэмжээ"><textarea style={{...inp,minHeight:68,resize:"vertical"}} value={f.measures} onChange={e=>s("measures",e.target.value)} placeholder="Яаралтай арга хэмжээ..."/></Field>
+    <Field label="Болсон эрсдэл"><textarea style={{...inp,minHeight:68,resize:"vertical"}} value={f.risks} onChange={e=>s("risks",e.target.value)} placeholder="Хохирол, хүний хохирол..."/></Field>
+    <Field label="Сургамж"><textarea style={{...inp,minHeight:68,resize:"vertical"}} value={f.lesson} onChange={e=>s("lesson",e.target.value)} placeholder="Ирээдүйд авах арга хэмжээ..."/></Field>
+    <div style={{display:"flex",gap:10,marginTop:18}}>
+      <button onClick={()=>{if(!f.name||!f.location||!f.date){alert("Нэр, байршил, огноо заавал бөглөнө!");return;}onSave(f);}} style={{flex:1,background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",color:"#fff",border:"none",borderRadius:12,padding:"12px 0",fontWeight:800,fontSize:14,cursor:"pointer"}}>✅ Хадгалах</button>
+      <button onClick={onCancel} style={{flex:1,background:"#1e293b",color:"#94a3b8",border:"1px solid #334155",borderRadius:12,padding:"12px 0",fontWeight:700,fontSize:14,cursor:"pointer"}}>Болих</button>
+    </div>
+  </div>;
+}
+
+function Detail({d,onEdit,onDelete,onClose,isAdmin}) {
+  const rows=[
+    {icon:"🏷️",label:"Төрөл",val:<Badge type={d.type}/>},
+    {icon:"📍",label:"Байршил",val:d.location},
+    {icon:"📅",label:"Он сар өдөр",val:d.date},
+    {icon:"🚨",label:"Авсан арга хэмжээ",val:d.measures},
+    {icon:"⚠️",label:"Болсон эрсдэл",val:d.risks},
+    {icon:"📖",label:"Сургамж",val:d.lesson},
+  ];
+  return <div>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
+      <h2 style={{color:"#f1f5f9",fontSize:15,fontWeight:900,margin:0,flex:1,marginRight:10,lineHeight:1.4}}>{d.name}</h2>
+      <button onClick={onClose} style={{background:"none",border:"none",color:"#64748b",fontSize:22,cursor:"pointer",padding:0}}>✕</button>
+    </div>
+    {rows.map(r=><div key={r.label} style={{borderBottom:"1px solid #1e293b",paddingBottom:10,marginBottom:10}}>
+      <div style={{color:"#64748b",fontSize:10,fontWeight:700,letterSpacing:0.8,textTransform:"uppercase",marginBottom:3}}>{r.icon} {r.label}</div>
+      <div style={{color:"#cbd5e1",fontSize:13,lineHeight:1.6}}>{r.val||"—"}</div>
+    </div>)}
+    {isAdmin&&<div style={{display:"flex",gap:10,marginTop:14}}>
+      <button onClick={onEdit} style={{flex:1,background:"#1e40af22",color:"#60a5fa",border:"1px solid #1e40af55",borderRadius:10,padding:"10px 0",fontWeight:700,fontSize:13,cursor:"pointer"}}>✏️ Засах</button>
+      <button onClick={onDelete} style={{flex:1,background:"#7f1d1d22",color:"#f87171",border:"1px solid #7f1d1d55",borderRadius:10,padding:"10px 0",fontWeight:700,fontSize:13,cursor:"pointer"}}>🗑️ Устгах</button>
+    </div>}
+  </div>;
+}
+
+function Card({d,onClick}) {
+  const c=clr(d.type);
+  return <div onClick={onClick} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:16,padding:16,cursor:"pointer",transition:"all 0.2s",position:"relative",overflow:"hidden"}}
+    onMouseEnter={e=>{e.currentTarget.style.borderColor=c+"88";e.currentTarget.style.transform="translateY(-2px)";}}
+    onMouseLeave={e=>{e.currentTarget.style.borderColor="#1e293b";e.currentTarget.style.transform="none";}}>
+    <div style={{position:"absolute",top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${c},transparent)`}}/>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8,gap:8}}>
+      <span style={{color:"#f1f5f9",fontWeight:700,fontSize:14,flex:1,lineHeight:1.4}}>{d.name}</span>
+      <Badge type={d.type}/>
+    </div>
+    <div style={{color:"#64748b",fontSize:12,marginBottom:3}}>📍 {d.location}</div>
+    <div style={{color:"#64748b",fontSize:12,marginBottom:8}}>📅 {d.date}</div>
+    {d.lesson&&<div style={{background:"#1e293b",borderRadius:8,padding:"6px 10px",color:"#94a3b8",fontSize:12,lineHeight:1.4}}>📖 {d.lesson.length>90?d.lesson.slice(0,90)+"…":d.lesson}</div>}
+  </div>;
+}
+
+function Login({onLogin}) {
+  const [mode,setMode]=useState("user");
+  const [pass,setPass]=useState("");
+  const [err,setErr]=useState("");
+  return <div style={{minHeight:"100vh",background:"#020817",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,backgroundImage:"radial-gradient(ellipse at 20% 50%,#1e3a5f22 0%,transparent 60%)"}}>
+    <div style={{marginBottom:32,textAlign:"center"}}>
+      <div style={{fontSize:52,marginBottom:10}}>🌪️</div>
+      <h1 style={{color:"#f1f5f9",fontSize:22,fontWeight:900,margin:0}}>Орхон аймгийн</h1>
+      <h2 style={{color:"#60a5fa",fontSize:18,fontWeight:900,margin:"4px 0 0"}}>Гамшгийн Мэдээллийн Сан</h2>
+      <p style={{color:"#475569",fontSize:12,marginTop:8}}>2005–2017 оны гамшгийн бүртгэл • 29 тохиолдол</p>
+    </div>
+    <div style={{width:"100%",maxWidth:340,background:"#0f172a",border:"1px solid #1e293b",borderRadius:24,padding:26}}>
+      <div style={{display:"flex",background:"#020817",borderRadius:12,padding:4,marginBottom:20}}>
+        {["user","admin"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("");setPass("");}} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",background:mode===m?"linear-gradient(135deg,#3b82f6,#8b5cf6)":"transparent",color:mode===m?"#fff":"#64748b",fontWeight:700,fontSize:13,cursor:"pointer"}}>
+          {m==="user"?"👤 Хэрэглэгч":"🔐 Админ"}
+        </button>)}
+      </div>
+      {mode==="admin"&&<div style={{marginBottom:16}}>
+        <label style={{color:"#94a3b8",fontSize:11,fontWeight:700,display:"block",marginBottom:6,letterSpacing:0.8,textTransform:"uppercase"}}>Нууц үг</label>
+        <input type="password" value={pass} onChange={e=>{setPass(e.target.value);setErr("");}} onKeyDown={e=>e.key==="Enter"&&(pass==="admin123"?onLogin("admin"):setErr("Нууц үг буруу!"))} placeholder="Нууц үг оруулна уу" style={inp}/>
+        {err&&<div style={{color:"#f87171",fontSize:12,marginTop:5}}>{err}</div>}
+        <div style={{color:"#334155",fontSize:11,marginTop:4}}>Нууц үг: admin123</div>
+      </div>}
+      <button onClick={()=>{if(mode==="admin"&&pass!=="admin123"){setErr("Нууц үг буруу!");return;}onLogin(mode);}} style={{width:"100%",background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",color:"#fff",border:"none",borderRadius:12,padding:"13px 0",fontWeight:800,fontSize:15,cursor:"pointer",boxShadow:"0 8px 24px rgba(99,102,241,0.35)"}}>
+        Нэвтрэх →
+      </button>
+    </div>
+  </div>;
+}
+
+function App() {
+  const [role,setRole]=useState(null);
+  const [data,setData]=useState(()=>{try{const s=localStorage.getItem("orkhon_v3");return s?JSON.parse(s):REAL_DISASTERS;}catch{return REAL_DISASTERS;}});
+  const [search,setSearch]=useState("");
+  const [filter,setFilter]=useState("Бүгд");
+  const [modal,setModal]=useState(null);
+
+  useEffect(()=>{try{localStorage.setItem("orkhon_v3",JSON.stringify(data));}catch{}},[data]);
+
+  const isAdmin=role==="admin";
+  const filtered=data.filter(d=>{
+    const mt=filter==="Бүгд"||d.type===filter;
+    const ms=!search||[d.name,d.location,d.type,d.lesson,d.risks,d.measures].some(f=>f&&f.toLowerCase().includes(search.toLowerCase()));
+    return mt&&ms;
+  });
+
+  const byType=data.reduce((a,d)=>{a[d.type]=(a[d.type]||0)+1;return a;},{});
+  const top=Object.entries(byType).sort((a,b)=>b[1]-a[1])[0];
+
+  if(!role) return <Login onLogin={setRole}/>;
+
+  return <div style={{minHeight:"100vh",background:"#020817",color:"#f1f5f9",fontFamily:"'Segoe UI',system-ui,sans-serif",paddingBottom:90}}>
+    {/* HEADER */}
+    <div style={{background:"linear-gradient(135deg,#0f172a,#1e1b4b)",borderBottom:"1px solid #1e293b",padding:"14px 16px 12px",position:"sticky",top:0,zIndex:100}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div>
+          <div style={{fontSize:11,color:"#475569",marginBottom:2}}>🌪️ Орхон аймаг • Гамшгийн Мэдээллийн Сан</div>
+          <h1 style={{margin:0,fontSize:16,fontWeight:900,color:"#f1f5f9"}}>{isAdmin?"🔐 Админ хэсэг":"👤 Хэрэглэгч хэсэг"}</h1>
+        </div>
+        <button onClick={()=>setRole(null)} style={{background:"#1e293b",border:"1px solid #334155",color:"#94a3b8",borderRadius:10,padding:"7px 12px",fontSize:12,cursor:"pointer",fontWeight:600}}>Гарах</button>
+      </div>
+    </div>
+
+    <div style={{padding:14}}>
+      {/* STATS */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
+        {[{l:"Нийт",v:data.length,i:"📊"},{l:"Төрөл",v:Object.keys(byType).length,i:"🏷️"},{l:"Хамгийн их",v:top?top[0]:"—",i:"⚠️",sm:true}].map(s=>(
+          <div key={s.l} style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:14,padding:"12px 8px",textAlign:"center"}}>
+            <div style={{fontSize:18,marginBottom:4}}>{s.i}</div>
+            <div style={{color:"#f1f5f9",fontWeight:800,fontSize:s.sm?10:20,lineHeight:1.2}}>{s.v}</div>
+            <div style={{color:"#475569",fontSize:10,marginTop:2}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* SEARCH */}
+      <div style={{position:"relative",marginBottom:10}}>
+        <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:"#475569",fontSize:15}}>🔍</span>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Хайх... (нэр, байршил, сургамж)" style={{...inp,paddingLeft:36}}/>
+      </div>
+
+      {/* FILTER */}
+      <div className="hide-scroll" style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:8,marginBottom:12}}>
+        {["Бүгд",...TYPES].map(t=><button key={t} onClick={()=>setFilter(t)} style={{whiteSpace:"nowrap",padding:"5px 12px",borderRadius:20,border:filter===t?"none":"1px solid #1e293b",background:filter===t?(t==="Бүгд"?"linear-gradient(135deg,#3b82f6,#8b5cf6)":clr(t)):"#0f172a",color:filter===t?"#fff":"#64748b",fontWeight:600,fontSize:11,cursor:"pointer"}}>
+          {t!=="Бүгд"?icn(t)+" ":""}{t}
+        </button>)}
+      </div>
+
+      <div style={{color:"#475569",fontSize:12,marginBottom:12}}>{filtered.length} гамшиг олдлоо</div>
+
+      {/* LIST */}
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {filtered.length===0&&<div style={{textAlign:"center",color:"#334155",padding:50}}><div style={{fontSize:40,marginBottom:8}}>🔍</div><div>Илэрц олдсонгүй</div></div>}
+        {filtered.map(d=><Card key={d.id} d={d} onClick={()=>setModal({type:"detail",data:d})}/>)}
+      </div>
+    </div>
+
+    {/* BOTTOM */}
+    <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#0f172a",borderTop:"1px solid #1e293b",padding:"10px 16px 18px",display:"flex",gap:10}}>
+      {isAdmin
+        ?<button onClick={()=>setModal({type:"add"})} style={{flex:1,background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",color:"#fff",border:"none",borderRadius:14,padding:"13px 0",fontWeight:800,fontSize:15,cursor:"pointer",boxShadow:"0 8px 20px rgba(99,102,241,0.4)"}}>➕ Гамшиг нэмэх</button>
+        :<div style={{flex:1,textAlign:"center",color:"#334155",fontSize:12,padding:"10px 0"}}>👁️ Зөвхөн үзэх эрхтэй • {filtered.length} / {data.length} гамшиг</div>}
+    </div>
+
+    {/* MODALS */}
+    <Modal open={modal?.type==="add"} onClose={()=>setModal(null)}>
+      <Form onSave={f=>{setData(d=>[...d,{...f,id:Date.now()}]);setModal(null);}} onCancel={()=>setModal(null)}/>
+    </Modal>
+    <Modal open={modal?.type==="edit"} onClose={()=>setModal(null)}>
+      <Form initial={modal?.data} onSave={f=>{setData(d=>d.map(x=>x.id===modal.data.id?{...f,id:x.id}:x));setModal(null);}} onCancel={()=>setModal(null)}/>
+    </Modal>
+    <Modal open={modal?.type==="detail"} onClose={()=>setModal(null)}>
+      {modal?.data&&<Detail d={modal.data} isAdmin={isAdmin}
+        onEdit={()=>setModal({type:"edit",data:modal.data})}
+        onDelete={()=>{if(window.confirm("Устгах уу?")){setData(d=>d.filter(x=>x.id!==modal.data.id));setModal(null);}}}
+        onClose={()=>setModal(null)}/>}
+    </Modal>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
 </html>
